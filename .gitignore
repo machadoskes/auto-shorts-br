@@ -1,0 +1,16 @@
+# segredos: nunca subir
+.env
+*.env
+dados/
+config.json
+
+# gerados na sua máquina
+.venv/
+ffmpeg/
+saida/
+logs/
+perfil/
+midia/
+__pycache__/
+*.pyc
+*.tmp
