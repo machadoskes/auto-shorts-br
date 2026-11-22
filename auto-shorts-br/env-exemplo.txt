@@ -1,0 +1,22 @@
+# O instalar.bat copia este arquivo para ".env". Preencha o .env e NUNCA o compartilhe
+# (nem suba para o GitHub: ele já está no .gitignore).
+# O passo a passo para conseguir cada chave está em docs/CONFIGURAR_CONTAS.md
+
+# Chave gratuita do Google AI Studio: https://aistudio.google.com/apikey
+GEMINI_API_KEY=
+
+# Instagram (API com Login do Instagram)
+IG_USER_ID=
+IG_ACCESS_TOKEN=
+
+# B-roll gratuito (opcional): chave grátis em https://pixabay.com/api/docs/ (após login)
+PIXABAY_API_KEY=
+PEXELS_API_KEY=
+
+# TikTok (TikTok for Developers > seu app > Credentials)
+TIKTOK_CLIENT_KEY=
+TIKTOK_CLIENT_SECRET=
+
+# YouTube (Google Cloud > seu projeto > APIs e serviços > Credenciais > cliente "App para computador")
+YT_CLIENT_ID=
+YT_CLIENT_SECRET=

@@ -1,0 +1,76 @@
+{
+  "_LEIA": "Copie estes campos por cima dos mesmos campos do seu config.json.",
+  "perfil": "@seu.perfil",
+  "canal": {
+    "assunto": "GTA VI",
+    "nome_canal": "Notícias de GTA VI",
+    "marca": "GTA NEWS",
+    "contexto": "O lançamento de GTA VI é em 19/11/2026 (quinta-feira).",
+    "fonte_oficial": "Rockstar Games",
+    "descricao_imagens": "cenas e imagens oficiais do jogo GTA VI",
+    "clima_broll": "no clima de Vice City/Miami",
+    "exemplos_manchete": [
+      "GTA 6 LANÇA NA QUINTA E SEXTA É FERIADO",
+      "CARROS DO GTA 6 ESTÃO NAS RUAS"
+    ],
+    "hashtag_principal": "#GTA6",
+    "siglas": [
+      "GTA",
+      "VI"
+    ],
+    "personagens": {
+      "lucia": "protagonista mulher latina de cabelo escuro",
+      "jason": "protagonista homem branco de cabelo curto e barba"
+    },
+    "aviso_rodape": "Página de fã, sem vínculo com a Rockstar Games.",
+    "credito_imagens": "Imagens: Rockstar Games",
+    "tags_youtube": [
+      "GTA 6",
+      "GTA VI",
+      "Grand Theft Auto VI",
+      "Rockstar Games",
+      "GTA 6 Brasil"
+    ],
+    "evento": {
+      "nome": "GTA VI",
+      "data": "2026-11-19"
+    },
+    "palavras_genericas": [
+      "gta",
+      "vi",
+      "6",
+      "jogo"
+    ]
+  },
+  "fontes_rss": [
+    "https://news.google.com/rss/search?q=%22GTA+6%22+OR+%22GTA+VI%22&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+    "https://www.reddit.com/r/GTA6/top/.rss?t=day"
+  ],
+  "palavras_obrigatorias": [
+    "gta 6",
+    "gta vi",
+    "gta6",
+    "grand theft auto vi"
+  ],
+  "hashtags_fixas": [
+    "#GTA6",
+    "#GTAVI"
+  ],
+  "broll": {
+    "ativar": true,
+    "maximo_videos": 8,
+    "palavras_padrao": [
+      "miami night drive",
+      "neon city street",
+      "sports car racing",
+      "palm trees sunset"
+    ]
+  },
+  "trailers": [
+    {
+      "nome": "GTAVI_Trailer_2",
+      "url": "https://mms.businesswire.com/media/20250506618004/en/2460844/19/GTAVI_Trailer_2.mp4?download=1",
+      "fonte": "Comunicado oficial Take-Two/Rockstar no Business Wire (06/05/2025)"
+    }
+  ]
+}
