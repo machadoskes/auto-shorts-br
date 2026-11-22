@@ -5,6 +5,7 @@ quebra quando o Google aposenta uma versão.
 """
 import re
 import time
+from datetime import datetime, timedelta, timezone
 
 import requests
 
@@ -13,10 +14,37 @@ from .util import PASTA_DADOS, ler_json, log, salvar_json
 RAIZ_API = "https://generativelanguage.googleapis.com/v1beta"
 ARQ_CACHE = PASTA_DADOS / "modelos_gemini.json"
 VALIDADE_CACHE = 2 * 86400  # 2 dias
+ARQ_COTA = PASTA_DADOS / "cota_gemini.json"
 
 
 class ErroGemini(RuntimeError):
     pass
+
+
+class ErroCotaEsgotada(ErroGemini):
+    """Todos os modelos gratuitos bateram a cota do dia: o sistema para de chamar o Gemini até a renovação."""
+
+
+# ------------------------------------------------------------------ freio de cota
+# A cota diária gratuita do Gemini renova à meia-noite do horário do Pacífico (~5h de Brasília).
+# Quando um modelo devolve "cota esgotada", ele fica bloqueado até a renovação; quando todos
+# os modelos de um tipo estão bloqueados, nenhuma chamada é feita (nem tentativa) até lá.
+def _dia_cota() -> str:
+    return (datetime.now(timezone.utc) - timedelta(hours=8)).strftime("%Y-%m-%d")
+
+
+def _esgotados() -> set:
+    dados = ler_json(ARQ_COTA, {})
+    return set(dados.get("modelos", [])) if dados.get("dia") == _dia_cota() else set()
+
+
+def _marcar_esgotado(modelo: str) -> None:
+    salvar_json(ARQ_COTA, {"dia": _dia_cota(), "modelos": sorted(_esgotados() | {modelo})})
+
+
+def _aviso_freio(tipo: str) -> str:
+    return (f"FREIO DE COTA: todos os modelos gratuitos de {tipo} do Gemini esgotaram a cota de hoje. "
+            "Nenhuma nova chamada será feita até a renovação (por volta das 5h de Brasília).")
 
 
 def _versao(nome: str) -> float:
@@ -64,8 +92,13 @@ def chamar(tipo: str, preferidos: list, corpo: dict, api_key: str, timeout: int 
     modelos = _candidatos(tipo, preferidos, api_key)
     if not modelos:
         raise ErroGemini(f"Nenhum modelo de {tipo} disponível para esta chave.")
+    modelos = modelos[:6]
+    bloqueados = _esgotados()
+    livres = [m for m in modelos if m not in bloqueados]
+    if not livres:
+        raise ErroCotaEsgotada(_aviso_freio(tipo))
     ultimo_erro = ""
-    for modelo in modelos[:6]:
+    for modelo in livres:
         for tentativa in range(3):
             try:
                 r = requests.post(
@@ -84,7 +117,8 @@ def chamar(tipo: str, preferidos: list, corpo: dict, api_key: str, timeout: int 
             ultimo_erro = f"{modelo}: HTTP {r.status_code} {r.text[:300]}"
             # 429 com limite zero = modelo fora do plano gratuito -> pula na hora
             if r.status_code == 429 and re.search(r"limit:\s*0\b|free_tier.*limit.*0|exceeded your current quota", r.text):
-                log(f"{modelo}: cota gratuita do dia esgotada; usando outro modelo.")
+                log(f"{modelo}: cota gratuita do dia esgotada; bloqueado até a renovação.")
+                _marcar_esgotado(modelo)
                 break
             if r.status_code in (500, 503):
                 if tentativa >= 1:
@@ -99,6 +133,9 @@ def chamar(tipo: str, preferidos: list, corpo: dict, api_key: str, timeout: int 
                 continue
             break  # 400/403/404: tenta o próximo modelo
         log(f"Modelo {modelo} não respondeu, tentando o próximo. ({ultimo_erro[:150]})")
+    if all(m in _esgotados() for m in modelos):
+        log(_aviso_freio(tipo))
+        raise ErroCotaEsgotada(_aviso_freio(tipo))
     raise ErroGemini(f"Nenhum modelo respondeu. Último erro: {ultimo_erro}")
 
 

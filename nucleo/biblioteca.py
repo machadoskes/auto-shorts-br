@@ -162,10 +162,18 @@ def montar(cfg: dict, api_key: str, refazer: bool = False) -> int:
 
     novas = []
     ja_feitas = {c["fonte"] for c in banco.values()}
+    por_fonte = {}
+    for c in banco.values():
+        por_fonte[c["fonte"]] = por_fonte.get(c["fonte"], 0) + 1
     for v in videos:
         fonte = _rel(v)
+        base_id = re.sub(r"[^A-Za-z0-9]+", "_", v.stem)[:40]
         if fonte in ja_feitas or v.name in ja_feitas:
-            continue
+            # vídeo cortado numa execução interrompida: tem miniaturas, mas a maioria das cenas sumiu
+            minis = len(list(PASTA_MINIS.glob(f"{base_id}_*.jpg")))
+            if v.suffix.lower() in EXT_IMG or por_fonte.get(fonte, 0) >= minis * 0.5:
+                continue
+            log(f"{v.name}: corte incompleto numa execução anterior; recuperando as cenas.")
         if v.suffix.lower() in EXT_IMG:
             cid = "img_" + re.sub(r"[^A-Za-z0-9]+", "_", fonte)[-60:]
             mini = PASTA_MINIS / f"{cid}.jpg"
@@ -185,9 +193,10 @@ def montar(cfg: dict, api_key: str, refazer: bool = False) -> int:
         log(f"Analisando {v.name} ({v.stat().st_size / 1e6:.0f} MB)... vídeos grandes demoram.")
         cenas = _dividir(v)
         log(f"{v.name}: {len(cenas)} cenas detectadas.")
-        base_id = re.sub(r"[^A-Za-z0-9]+", "_", v.stem)[:40]
         for k, (a, b) in enumerate(cenas):
             cid = f"{base_id}_{k:03d}"
+            if cid in banco:
+                continue  # já etiquetada antes
             mini = PASTA_MINIS / f"{cid}.jpg"
             brilho = _miniatura(v, (a + b) / 2, mini)
             if brilho < 22:  # tela preta / letreiro escuro
@@ -202,6 +211,8 @@ def montar(cfg: dict, api_key: str, refazer: bool = False) -> int:
     if pendentes:
         log(f"Reetiquetando {len(pendentes)} cenas que ficaram sem etiqueta antes.")
     novas = pendentes + novas
+    for c in novas:  # todas entram no arquivo já; as sem etiqueta são retomadas na próxima execução
+        banco[c["id"]] = c
     for i in range(0, len(novas), 12):
         lote = novas[i:i + 12]
         try:
