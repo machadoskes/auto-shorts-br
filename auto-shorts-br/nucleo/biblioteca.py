@@ -206,6 +206,11 @@ def montar(cfg: dict, api_key: str, refazer: bool = False) -> int:
         lote = novas[i:i + 12]
         try:
             res = _etiquetar(lote, cfg, api_key)
+        except gemini.ErroCotaEsgotada:
+            faltam = len(novas) - i
+            log(f"Parando a etiquetagem: cota do Gemini esgotada. {faltam} cenas ficaram para depois; "
+                "rode o montar biblioteca de novo amanhã (ele continua de onde parou).")
+            break
         except Exception as e:  # noqa: BLE001
             log(f"Falha ao etiquetar cenas {i}-{i + len(lote)}: {e}")
             res = {}
