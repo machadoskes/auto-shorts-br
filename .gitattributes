@@ -1,0 +1,5 @@
+# os .bat ficam com CRLF (Windows) exatamente como estão no repositório
+*.bat -text
+*.py text eol=lf
+*.json text eol=lf
+*.md text eol=lf
